@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wunschliste</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;padding:20px;background:#fbfbfd;color:#0f172a}
+    .card{max-width:720px;margin:20px auto;padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06);background:white}
+    h1{font-size:28px;margin:0 0 8px}
+    p.lead{color:#475569;margin:0 0 18px}
+    label{display:block;margin-top:12px;font-weight:600}
+    input[type="text"], input[type="email"], textarea, select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;margin-top:6px;font-size:14px;box-sizing:border-box}
+    textarea{min-height:100px;resize:vertical}
+    .row{display:flex;gap:12px}
+    .small{flex:1}
+    .btn{display:inline-block;margin-top:14px;padding:10px 14px;border-radius:10px;background:#111827;color:white;border:0;cursor:pointer;font-weight:700}
+    .muted{color:#64748b;font-size:13px;margin-top:6px}
+    footer{font-size:13px;color:#94a3b8;margin-top:16px}
+    .success{background:#ecfdf5;padding:10px;border-radius:8px;color:#065f46;margin-top:12px;display:none}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Wunschliste ✨</h1>
+    <p class="lead">Kurz ausfüllen — die Antworten werden per E‑Mail verschickt</p>
+
+    <label for="organizer">E‑Mail, an die Antworten gehen sollen</label>
+    <input id="organizer" type="email" placeholder="deine@email.de (eintragen bevor du teilst)" />
+
+    <label for="name">Name</label>
+    <input id="name" type="text" placeholder="z. B. Lina" />
+
+    <label for="wish">Mein Wunsch</label>
+    <input id="wish" type="text" placeholder="Was wünschst du dir?" />
+
+    <label for="why">Warum ich mir das wünsche</label>
+    <textarea id="why" placeholder="Kurz warum"></textarea>
+
+    <div class="row">
+      <div class="small">
+        <label for="when">Wann ich’s gern hätte</label>
+        <input id="when" type="text" placeholder="z. B. bis 24.12.2025 oder offen" />
+      </div>
+      <div class="small">
+        <label for="prio">Priorität</label>
+        <select id="prio">
+          <option value="keine">keine</option>
+          <option value="nice-to-have">Nice to have</option>
+          <option value="wichtig">Wichtig</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="note">Extra Notiz (optional)</label>
+    <textarea id="note" placeholder="z. B. Größe, Farbe, Allergien, etc."></textarea>
+
+    <button id="submitBtn" class="btn">Antwort per E‑Mail senden</button>
+    <button id="copyBtn" class="btn" style="background:#0ea5e9;margin-left:8px">Antwort kopieren</button>
+
+    <div id="msg" class="success">Antwort vorbereitet. Mailclient sollte sich öffnen oder Text wurde kopiert.</div>
+
+    <footer>
+      Wenn du den Link teilen willst lade die Datei hoch zu GitHub Pages oder Netlify. Anleitung unten.
+    </footer>
+  </div>
+
+  <div class="card" style="max-width:720px;margin-top:8px">
+    <h2>Kurze Hosting‑Tipps</h2>
+    <ol>
+      <li>Upload die Datei <code>wunsch_form.html</code> in ein Repo und aktiviere GitHub Pages für den Branch main. Der Link ist dann <code>https://<span id="yourgh"></span>/wunsch_form.html</code></li>
+      <li>Oder zieh sie zu Netlify / Vercel und du kriegst sofort nen öffentlichen Link</li>
+    </ol>
+    <p class="muted">Wenn du willst kann ich dir die Datei geben damit du sie hochladen kannst.</p>
+  </div>
+
+  <script>
+    function gather() {
+      return {
+        name: document.getElementById('name').value.trim(),
+        wish: document.getElementById('wish').value.trim(),
+        why: document.getElementById('why').value.trim(),
+        when: document.getElementById('when').value.trim(),
+        prio: document.getElementById('prio').value,
+        note: document.getElementById('note').value.trim(),
+        organizer: document.getElementById('organizer').value.trim()
+      }
+    }
+
+    function makeBody(o) {
+      return 'Name: ' + o.name + '\\n' +
+             'Wunsch: ' + o.wish + '\\n' +
+             'Warum: ' + o.why + '\\n' +
+             'Wann: ' + o.when + '\\n' +
+             'Priorität: ' + o.prio + '\\n' +
+             'Extra Notiz: ' + o.note + '\\n';
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', function(){
+      var o = gather();
+      var body = encodeURIComponent(makeBody(o));
+      var subj = encodeURIComponent('Neue Wunschliste Antwort von ' + (o.name || 'anonymer Nutzer'));
+      if (o.organizer) {
+        var mail = 'mailto:' + encodeURIComponent(o.organizer) + '?subject=' + subj + '&body=' + body;
+        window.location.href = mail;
+        document.getElementById('msg').style.display = 'block';
+      } else {
+        // If no organizer, just copy to clipboard
+        navigator.clipboard.writeText(makeBody(o)).then(function(){ 
+          document.getElementById('msg').style.display = 'block';
+        });
+      }
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', function(){
+      var o = gather();
+      navigator.clipboard.writeText(makeBody(o)).then(function(){ 
+        document.getElementById('msg').style.display = 'block';
+      });
+    });
+
+    // show placeholder repo owner to hint at GH Pages path
+    document.getElementById('yourgh').textContent = 'your-username.github.io';
+  </script>
+</body>
+</html>
